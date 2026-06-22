@@ -1,34 +1,20 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Badge, Avatar, PageHeader, useToast } from '../../components/ui';
-import { DRIVERS } from '../../data/mockData';
-export default function Drivers() {
+const API = 'https://fastkart-gt44.onrender.com/api';
+const token = () => localStorage.getItem('fk_token') || '';
+export default function Page() {
   const toast = useToast();
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
   return (
     <div>
-      <PageHeader title="Drivers" sub={`${DRIVERS.length} registered drivers`}>
-        <button className="btn btn-primary">+ Add Driver</button>
-      </PageHeader>
-      <div className="grid-4">
-        {[['84','Active Now','12 on trip','#ECFDF5','🚗'],['12','Offline Today','High today','#FFFBEB','😴'],['4.6','Avg Rating','● Good','#F5F3FF','⭐'],['₹2.4L','Driver Payouts','This month','#EFF6FF','💰']].map(([v,l,c,bg,i]) => (
-          <div key={l} className="stat-card"><div className="stat-icon" style={{background:bg}}>{i}</div><div className="stat-value">{v}</div><div className="stat-label">{l}</div><div className="stat-change up">{c}</div></div>
-        ))}
-      </div>
+      <PageHeader title="Drivers" sub="Registered drivers"/>
       <div className="card">
-        <div className="table-wrap">
-          <table>
-            <thead><tr><th>Driver</th><th>Phone</th><th>Vehicle No.</th><th>Trips</th><th>Rating</th><th>Earnings</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>{DRIVERS.map(d => (
-              <tr key={d.id}>
-                <td><div className="user-row"><Avatar name={d.name}/><div className="td-bold">{d.name}</div></div></td>
-                <td style={{color:'var(--text-secondary)',fontSize:11.5}}>{d.phone}</td>
-                <td style={{fontFamily:'monospace',fontSize:12}}>{d.vehicle}</td>
-                <td style={{fontWeight:600,textAlign:'center'}}>{d.trips}</td>
-                <td style={{fontWeight:700,color:'var(--warning)'}}>⭐ {d.rating}</td>
-                <td style={{fontWeight:700,color:'var(--success)'}}>{d.earnings}</td>
-                <td><Badge status={d.status}/></td>
-                <td><button className="btn btn-outline btn-sm" onClick={() => toast('Driver details!')}>View</button></td>
-              </tr>
-            ))}</tbody>
-          </table>
+        <div style={{textAlign:'center',padding:64,color:'var(--text-muted)'}}>
+          <div style={{fontSize:48,marginBottom:16}}>🚗</div>
+          <div style={{fontSize:16,fontWeight:600,color:'var(--text-secondary)',marginBottom:8}}>No Drivers Yet</div>
+          <div style={{fontSize:13}}>Data will appear here when customers use the app</div>
         </div>
       </div>
     </div>

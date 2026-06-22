@@ -1,48 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Badge, Avatar, PageHeader, FilterTabs, useToast } from '../../components/ui';
-import { USERS } from '../../data/mockData';
 const TABS = [{id:'all',label:'All Users'},{id:'active',label:'Active'},{id:'blocked',label:'Blocked'}];
+const token = () => localStorage.getItem('fk_token') || '';
 export default function Users() {
   const toast = useToast();
-  const [users, setUsers] = useState(USERS);
+  const [users, setUsers] = useState([]);
   const [filter, setFilter] = useState('all');
-  const filtered = filter === 'all' ? users : users.filter(u => u.status === filter);
-  function toggle(id) {
-    setUsers(p => p.map(u => u.id === id ? {...u, status: u.status === 'blocked' ? 'active' : 'blocked'} : u));
-    toast('User status updated!');
-  }
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    axios.get('https://fastkart-gt44.onrender.com/api/me', {headers:{Authorization:'Bearer '+token()}})
+      .then(r => {
+        const user = r.data.data || r.data;
+        if(user && user.id) setUsers([user]);
+      })
+      .catch(() => setUsers([]))
+      .finally(() => setLoading(false));
+  }, []);
   return (
     <div>
-      <PageHeader title="Users" sub={`${users.length} registered customers`}>
-        <FilterTabs tabs={TABS} active={filter} onChange={setFilter}/>
-        <button className="btn btn-outline">⬇ Export</button>
-      </PageHeader>
-      <div className="card">
-        <div className="table-wrap">
-          <table>
-            <thead><tr><th>User</th><th>Phone</th><th>Orders</th><th>Total Spent</th><th>Wallet</th><th>Joined</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>{filtered.map(u => (
-              <tr key={u.id}>
-                <td><div className="user-row"><Avatar name={u.name}/><div><div className="td-bold">{u.name}</div><div className="td-sub">{u.email}</div></div></div></td>
-                <td style={{color:'var(--text-secondary)',fontSize:11.5}}>{u.phone}</td>
-                <td style={{fontWeight:700,textAlign:'center'}}>{u.orders}</td>
-                <td style={{fontWeight:700,color:'var(--success)'}}>{u.spent}</td>
-                <td style={{fontWeight:600,color:'var(--brand)'}}>{u.wallet}</td>
-                <td style={{fontSize:11.5,color:'var(--text-secondary)'}}>{u.joined}</td>
-                <td><Badge status={u.status}/></td>
-                <td>
-                  <div style={{display:'flex',gap:6}}>
-                    <button className="btn btn-ghost btn-sm">👁</button>
-                    <button className={`btn btn-sm ${u.status==='blocked'?'btn-success':'btn-danger'}`} onClick={() => toggle(u.id)}>
-                      {u.status === 'blocked' ? 'Unblock' : 'Block'}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}</tbody>
-          </table>
+      <PageHeader title="Users" sub={users.length + ' registered customers'}/>
+      {loading ? <div style={{textAlign:'center',padding:48}}>Loading...</div> : (
+        <div className="card">
+          {users.length === 0 ? (
+            <div style={{textAlign:'center',padding:64,color:'var(--text-muted)'}}>
+              <div style={{fontSize:48,marginBottom:16}}>👥</div>
+              <div style={{fontSize:16,fontWeight:600,color:'var(--text-secondary)',marginBottom:8}}>No Users Yet</div>
+              <div style={{fontSize:13}}>Users will appear here when they register on the app</div>
+            </div>
+          ) : (
+            <div className="table-wrap">
+              <table>
+                <thead><tr><th>User</th><th>Phone</th><th>Status</th></tr></thead>
+                <tbody>{users.map(u => (
+                  <tr key={u.id}>
+                    <td><div className="user-row"><Avatar name={u.name||'User'}/><div><div className="td-bold">{u.name||'User'}</div><div className="td-sub">{u.email||''}</div></div></div></td>
+                    <td>{u.phone||'-'}</td>
+                    <td><Badge status="active"/></td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
