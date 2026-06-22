@@ -1,4 +1,5 @@
-import { useState } from 'react';
+const fs = require('fs');
+const jsx = `import { useState } from 'react';
 import './Login.css';
 const E = 'fastkart@gmail.com';
 const P = 'admin123';
@@ -83,4 +84,6 @@ export default function Login({ onLogin }) {
       </div>
     </div>
   );
-}
+}`;
+fs.writeFileSync('src/pages/Login/index.jsx', jsx, 'utf8');
+console.log('Login updated - demo credentials removed!');
