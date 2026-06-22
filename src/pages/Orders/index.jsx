@@ -1,100 +1,61 @@
-// src/pages/Orders/index.jsx
-import { useState } from 'react';
-import { Badge, Avatar, FilterTabs, PageHeader, Modal, useToast } from '../../components/ui';
-import { FOOD_ORDERS } from '../../data/mockData';
-
-const TABS = [
-  { id: 'all', label: 'All Orders' },
-  { id: 'placed', label: 'Placed' },
-  { id: 'preparing', label: 'Preparing' },
-  { id: 'out_for_delivery', label: 'On Way' },
-  { id: 'delivered', label: 'Delivered' },
-  { id: 'cancelled', label: 'Cancelled' },
-];
-
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Badge, Avatar, PageHeader, FilterTabs, Modal, useToast } from '../../components/ui';
+const TABS = [{id:'all',label:'All'},{id:'placed',label:'Placed'},{id:'preparing',label:'Preparing'},{id:'out_for_delivery',label:'On Way'},{id:'delivered',label:'Delivered'},{id:'cancelled',label:'Cancelled'}];
+const token = () => localStorage.getItem('fk_token') || '';
 export default function Orders() {
   const toast = useToast();
+  const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState('all');
-  const [orders, setOrders] = useState(FOOD_ORDERS);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
-  const [newStatus, setNewStatus] = useState('');
-
-  const filtered = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
-
-  function updateStatus() {
-    setOrders((prev) => prev.map((o) => o.id === selected.id ? { ...o, status: newStatus } : o));
-    toast('Order status updated successfully!');
-    setSelected(null);
-  }
-
+  useEffect(() => {
+    axios.get('https://fastkart-gt44.onrender.com/api/orders', {headers:{Authorization:'Bearer '+token()}})
+      .then(r => setOrders(r.data.orders || []))
+      .catch(() => setOrders([]))
+      .finally(() => setLoading(false));
+  }, []);
+  const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
   return (
     <div>
-      <PageHeader title="Food Orders" sub={`${orders.length} total orders today`}>
-        <button className="btn btn-outline">⬇ Export CSV</button>
-        <button className="btn btn-primary">+ Manual Order</button>
+      <PageHeader title="Food Orders" sub={orders.length + ' total orders'}>
+        <button className="btn btn-outline">Export CSV</button>
       </PageHeader>
-
-      <FilterTabs tabs={TABS} active={filter} onChange={setFilter} />
-
-      <div className="card">
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Order ID</th><th>Customer</th><th>Restaurant</th>
-                <th>Items</th><th>Amount</th><th>Payment</th>
-                <th>Status</th><th>Time</th><th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((o) => (
-                <tr key={o.id}>
-                  <td><div style={{ fontWeight: 700, fontSize: 12, color: 'var(--brand)' }}>{o.id}</div></td>
-                  <td><div className="user-row"><Avatar name={o.customer} /><span style={{ fontWeight: 500 }}>{o.customer}</span></div></td>
-                  <td style={{ color: 'var(--text-secondary)' }}>{o.restaurant}</td>
-                  <td style={{ textAlign: 'center', fontWeight: 600 }}>{o.items}</td>
-                  <td style={{ fontWeight: 700, color: 'var(--brand-dark)' }}>{o.amount}</td>
-                  <td><span className="badge badge-gray">{o.payment}</span></td>
-                  <td><Badge status={o.status} /></td>
-                  <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{o.time}</td>
-                  <td>
-                    <button className="btn btn-ghost btn-sm" onClick={() => { setSelected(o); setNewStatus(o.status); }}>
-                      👁 View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <FilterTabs tabs={TABS} active={filter} onChange={setFilter}/>
+      {loading ? <div style={{textAlign:'center',padding:48,fontSize:16}}>Loading real data...</div> : (
+        <div className="card">
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Order ID</th><th>Customer</th><th>Restaurant</th><th>Amount</th><th>Status</th><th>Time</th></tr></thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={6} style={{textAlign:'center',padding:48,color:'var(--text-muted)'}}>
+                    No orders yet. Orders will appear here when customers place them.
+                  </td></tr>
+                ) : filtered.map(o => (
+                  <tr key={o.id} style={{cursor:'pointer'}} onClick={()=>setSelected(o)}>
+                    <td style={{color:'var(--brand)',fontWeight:700,fontSize:12}}>{o.id.slice(0,8).toUpperCase()}</td>
+                    <td><div className="user-row"><Avatar name={o.customer_name||'User'}/><span>{o.customer_name||'User'}</span></div></td>
+                    <td>{o.restaurant_name||'-'}</td>
+                    <td style={{fontWeight:700}}>₹{o.total||0}</td>
+                    <td><Badge status={o.status}/></td>
+                    <td style={{fontSize:11,color:'var(--text-muted)'}}>{new Date(o.created_at).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-
+      )}
       {selected && (
-        <Modal
-          title={`Order ${selected.id}`}
-          onClose={() => setSelected(null)}
-          footer={
-            <>
-              <button className="btn btn-outline" onClick={() => setSelected(null)}>Cancel</button>
-              <button className="btn btn-primary" onClick={updateStatus}>Update Status</button>
-            </>
-          }
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
-            {[['Customer', selected.customer], ['Restaurant', selected.restaurant], ['Amount', selected.amount], ['Payment', selected.payment], ['Items', selected.items + ' items'], ['Time', selected.time]].map(([k, v]) => (
-              <div key={k} style={{ background: 'var(--bg)', borderRadius: 8, padding: '10px 12px' }}>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '.04em' }}>{k}</div>
-                <div style={{ fontWeight: 600, fontSize: 13 }}>{v}</div>
+        <Modal title={'Order ' + selected.id.slice(0,8).toUpperCase()} onClose={()=>setSelected(null)} footer={<button className="btn btn-outline" onClick={()=>setSelected(null)}>Close</button>}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            {[['Customer',selected.customer_name||'User'],['Restaurant',selected.restaurant_name||'-'],['Amount','Rs. '+(selected.total||0)],['Status',selected.status],['Payment',selected.payment_method||'-'],['Date',new Date(selected.created_at).toLocaleString()]].map(([k,v])=>(
+              <div key={k} style={{background:'var(--bg)',borderRadius:8,padding:'10px 12px'}}>
+                <div style={{fontSize:10,color:'var(--text-muted)',marginBottom:3,textTransform:'uppercase'}}>{k}</div>
+                <div style={{fontWeight:600}}>{v}</div>
               </div>
             ))}
-          </div>
-          <div className="form-group">
-            <label className="form-label">Update Order Status</label>
-            <select className="form-input" value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-              {['placed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'].map((s) => (
-                <option key={s} value={s}>{s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</option>
-              ))}
-            </select>
           </div>
         </Modal>
       )}

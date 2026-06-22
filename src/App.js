@@ -43,12 +43,12 @@ const PAGES = {
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(
-    () => localStorage.getItem('fk_admin_auth') === 'true'
+    () => false
   );
   const [page, setPage] = useState('dashboard');
 
   function handleLogout() {
-    localStorage.removeItem('fk_admin_auth');
+    localStorage.getItem('fk_admin_auth') ==='true';
     setIsLoggedIn(false);
     setPage('dashboard');
   }
