@@ -1,20 +1,13 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Badge, Avatar, PageHeader, useToast } from '../../components/ui';
-const API = 'https://fastkart-gt44.onrender.com/api';
-const token = () => localStorage.getItem('fk_token') || '';
+import { PageHeader } from '../../components/ui';
 export default function Page() {
-  const toast = useToast();
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
   return (
     <div>
-      <PageHeader title="Hotel Bookings" sub="Real bookings from app"/>
+      <PageHeader title="Hotel Bookings"/>
       <div className="card">
-        <div style={{textAlign:'center',padding:64,color:'var(--text-muted)'}}>
-          <div style={{fontSize:48,marginBottom:16}}>🏨</div>
-          <div style={{fontSize:16,fontWeight:600,color:'var(--text-secondary)',marginBottom:8}}>No Hotel Bookings Yet</div>
-          <div style={{fontSize:13}}>Data will appear here when customers use the app</div>
+        <div style={{textAlign:'center',padding:80,color:'var(--text-muted)'}}>
+          <div style={{fontSize:52,marginBottom:16}}>🏨</div>
+          <div style={{fontSize:16,fontWeight:600,color:'var(--text-secondary)',marginBottom:8}}>No Data Yet</div>
+          <div style={{fontSize:13}}>Records will appear here when customers use the FastKart app</div>
         </div>
       </div>
     </div>

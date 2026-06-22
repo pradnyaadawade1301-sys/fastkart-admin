@@ -1,48 +1,30 @@
-// src/pages/Features/index.jsx
-import { FEATURES } from '../../data/mockData';
-
-const QUICK_STATS = [
-  { icon: '🍕', label: 'Food — Today',   items: [['Orders placed','142'],['Revenue','₹71,200'],['Avg delivery time','28 min'],['Cancellations','8']] },
-  { icon: '🎬', label: 'Movies — Today', items: [['Tickets sold','341'],['Revenue','₹34,100'],['Shows today','24'],['Avg occupancy','72%']] },
-  { icon: '🏨', label: 'Hotels — Today', items: [['Check-ins','18'],['Revenue','₹89,400'],['Avg stay','2.3 nights'],['Cancellations','2']] },
+import { PageHeader } from '../../components/ui';
+const FEATURES = [
+  {icon:'🍕',name:'Food Delivery'},{icon:'🛒',name:'Grocery'},
+  {icon:'🎬',name:'Movies'},{icon:'🏨',name:'Hotels'},
+  {icon:'🚕',name:'Rides & Cabs'},{icon:'🚲',name:'Bike Rentals'},
+  {icon:'✈️',name:'Flights'},{icon:'🚂',name:'Trains'},
+  {icon:'💊',name:'Medicine'},{icon:'🎭',name:'Leisure'},
 ];
-
-export default function Features({ onNav }) {
+export default function Features() {
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
-        <div className="page-title">All Features</div>
-        <div className="page-sub">Click any feature card to manage it</div>
-      </div>
-
+      <PageHeader title="All Features" sub="10 active features"/>
       <div className="feature-grid">
-        {FEATURES.map((f) => (
-          <div key={f.id} className="feature-card" onClick={() => onNav(f.id)}>
-            <span
-              className="feature-dot"
-              style={{ background: f.status === 'live' ? 'var(--success)' : 'var(--warning)' }}
-            />
+        {FEATURES.map(f => (
+          <div key={f.name} className="feature-card">
             <div className="feature-icon">{f.icon}</div>
             <div className="feature-name">{f.name}</div>
-            <div className="feature-count">{f.count}</div>
+            <div className="feature-count" style={{color:'var(--text-muted)'}}>No data yet</div>
           </div>
         ))}
       </div>
-
-      <div className="grid-3">
-        {QUICK_STATS.map((s) => (
-          <div key={s.label} className="card">
-            <div className="card-header"><span className="card-title">{s.icon} {s.label}</span></div>
-            <div className="card-body" style={{ padding: '12px 16px' }}>
-              {s.items.map(([k, v]) => (
-                <div key={k} className="mini-stat">
-                  <span>{k}</span>
-                  <span style={{ fontWeight: 600 }}>{v}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="card">
+        <div style={{textAlign:'center',padding:48,color:'var(--text-muted)'}}>
+          <div style={{fontSize:40,marginBottom:12}}>📊</div>
+          <div style={{fontSize:15,fontWeight:600,color:'var(--text-secondary)',marginBottom:8}}>No Activity Yet</div>
+          <div style={{fontSize:13}}>Feature statistics will appear when customers start using the app</div>
+        </div>
       </div>
     </div>
   );
